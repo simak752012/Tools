@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Resizer Tool | Free Online Photo Resizer</title>
+    <meta name="description" content="A free, fast, and easy-to-use online image resizer to adjust the dimensions of your photos quickly without any software.">
+    <meta name="keywords" content="image resizer, resize image, photo resizer, online tool, free resizer, change image size">
+    <meta name="author" content="Your Name">
+    <style>
+        /* CSS for responsive design and UI */
+        :root {
+            --primary-color: #007bff;
+            --bg-color: #f4f7f9;
+            --card-bg-color: #ffffff;
+            --text-color: #333;
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .tool-card {
+            background-color: var(--card-bg-color);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-light);
+            text-align: center;
+        }
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+        .input-container {
+            margin-bottom: 20px;
+        }
+        #imageInput {
+            display: none;
+        }
+        .upload-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-block;
+            font-size: 1rem;
+        }
+        .controls-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .dimension-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .dimension-inputs label {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+        .dimension-inputs input {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+        }
+        #resizeBtn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .result-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 20px;
+        }
+        .image-box {
+            text-align: center;
+            flex: 1 1 45%;
+        }
+        .image-box img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .download-btn {
+            background-color: #17a2b8;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 15px;
+        }
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #333;
+            color: white;
+            margin-top: auto;
+        }
+        @media (max-width: 768px) {
+            .result-container {
+                flex-direction: column;
+            }
+            .image-box {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Image Resizer Tool</h1>
+        <p>Resize your images quickly and easily online.</p>
+    </header>
+
+    <main class="container">
+        <section class="tool-card">
+            <div class="input-container">
+                <input type="file" id="imageInput" accept="image/*">
+                <label for="imageInput" class="upload-btn">Choose Image</label>
+            </div>
+
+            <div class="controls-container">
+                <div class="dimension-inputs">
+                    <label>
+                        Width:
+                        <input type="number" id="widthInput" placeholder="Auto">
+                    </label>
+                    <label>
+                        Height:
+                        <input type="number" id="heightInput" placeholder="Auto">
+                    </label>
+                </div>
+                <button id="resizeBtn">Resize Image</button>
+            </div>
+            
+            <div id="result" class="result-container">
+                <div class="image-box">
+                    <h3>Original Image</h3>
+                    <img id="originalImage" src="#" alt="Original Image" style="display:none;">
+                    <p id="originalSize"></p>
+                </div>
+                <div class="image-box">
+                    <h3>Resized Image</h3>
+                    <img id="resizedImage" src="#" alt="Resized Image" style="display:none;">
+                    <p id="resizedSize"></p>
+                    <a id="downloadLink" href="#" download="resized_image.jpg" class="download-btn" style="display:none;">Download</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Image Resizer Tool. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // JavaScript for dynamic functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const imageInput = document.getElementById('imageInput');
+            const widthInput = document.getElementById('widthInput');
+            const heightInput = document.getElementById('heightInput');
+            const resizeBtn = document.getElementById('resizeBtn');
+            const originalImageEl = document.getElementById('originalImage');
+            const resizedImageEl = document.getElementById('resizedImage');
+            const originalSizeEl = document.getElementById('originalSize');
+            const resizedSizeEl = document.getElementById('resizedSize');
+            const downloadLink = document.getElementById('downloadLink');
+
+            let originalImageFile = null;
+
+            imageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                originalImageFile = file;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    originalImageEl.src = event.target.result;
+                    originalImageEl.style.display = 'block';
+                    originalSizeEl.textContent = `Size: ${(originalImageFile.size / 1024).toFixed(2)} KB`;
+                    
+                    // Reset resized image display
+                    resizedImageEl.style.display = 'none';
+                    downloadLink.style.display = 'none';
+                    resizedSizeEl.textContent = '';
+                };
+                reader.readAsDataURL(file);
+            });
+
+            resizeBtn.addEventListener('click', () => {
+                if (!originalImageFile) {
+                    alert('Please select an image first.');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        let newWidth = parseInt(widthInput.value) || img.width;
+                        let newHeight = parseInt(heightInput.value) || img.height;
+                        
+                        if (widthInput.value && !heightInput.value) {
+                            newHeight = (img.height / img.width) * newWidth;
+                        } else if (!widthInput.value && heightInput.value) {
+                            newWidth = (img.width / img.height) * newHeight;
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = newWidth;
+                        canvas.height = newHeight;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+                        const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.9); // You can adjust quality here
+                        resizedImageEl.src = resizedDataUrl;
+                        resizedImageEl.style.display = 'block';
+
+                        const resizedFileSize = (resizedDataUrl.length * 0.75) / 1024;
+                        resizedSizeEl.textContent = `Size: ${resizedFileSize.toFixed(2)} KB`;
+
+                        downloadLink.href = resizedDataUrl;
+                        downloadLink.style.display = 'block';
+                    };
+                };
+                reader.readAsDataURL(originalImageFile);
+            });
+        });
+    </script>
+</body>
+</html>
