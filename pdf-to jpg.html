@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to JPG Converter | Free Online Tool</title>
+    <meta name="description" content="A free and fast online tool to convert PDF documents into high-quality JPG images. Convert your PDFs with a single click.">
+    <meta name="keywords" content="pdf to jpg, convert pdf, online pdf converter, free pdf tool, pdf to image, pdf to jpg converter">
+    <meta name="author" content="Your Name">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <style>
+        /* CSS for responsive design and UI */
+        :root {
+            --primary-color: #dc3545;
+            --bg-color: #f4f7f9;
+            --card-bg-color: #ffffff;
+            --text-color: #333;
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .tool-card {
+            background-color: var(--card-bg-color);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-light);
+            text-align: center;
+        }
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+        h1, h2, h3 {
+            color: var(--primary-color);
+        }
+        .input-container {
+            margin-bottom: 20px;
+        }
+        #pdfInput {
+            display: none;
+        }
+        .upload-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-block;
+            font-size: 1rem;
+        }
+        .controls-container {
+            margin-top: 20px;
+        }
+        #convertBtn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        #preview, #downloadSection {
+            margin-top: 30px;
+        }
+        .preview-image {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .download-btn {
+            background-color: #17a2b8;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: block;
+            width: fit-content;
+            margin: 0 auto;
+        }
+        .download-zip-btn {
+            background-color: #17a2b8;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 15px;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none; /* Hidden by default */
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #333;
+            color: white;
+            margin-top: auto;
+        }
+        @media (max-width: 768px) {
+            .tool-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>PDF to JPG Converter</h1>
+        <p>Convert your PDF files to high-quality JPG images.</p>
+    </header>
+
+    <main class="container">
+        <section class="tool-card">
+            <div class="input-container">
+                <input type="file" id="pdfInput" accept="application/pdf">
+                <label for="pdfInput" class="upload-btn">Choose PDF File</label>
+            </div>
+
+            <div class="controls-container">
+                <button id="convertBtn">Convert to JPG</button>
+            </div>
+
+            <div id="loading" class="loader"></div>
+            
+            <div id="preview" style="display: none;">
+                <h3>Conversion Preview</h3>
+            </div>
+            
+            <div id="downloadSection" style="display: none;">
+                <h3>Download Your Images</h3>
+                <a id="downloadZip" class="download-zip-btn" href="#" download="converted_images.zip">Download All as ZIP</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 PDF to JPG Converter. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Set the workerSrc for PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const pdfInput = document.getElementById('pdfInput');
+            const convertBtn = document.getElementById('convertBtn');
+            const loadingIndicator = document.getElementById('loading');
+            const previewSection = document.getElementById('preview');
+            const downloadSection = document.getElementById('downloadSection');
+            const downloadZipLink = document.getElementById('downloadZip');
+
+            let pdfFile = null;
+
+            pdfInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file && file.type === "application/pdf") {
+                    pdfFile = file;
+                    convertBtn.style.display = 'block';
+                    previewSection.style.display = 'none';
+                    downloadSection.style.display = 'none';
+                } else {
+                    alert('Please select a valid PDF file.');
+                    pdfFile = null;
+                }
+            });
+
+            convertBtn.addEventListener('click', async () => {
+                if (!pdfFile) {
+                    alert('Please choose a PDF file first.');
+                    return;
+                }
+
+                convertBtn.style.display = 'none';
+                loadingIndicator.style.display = 'block';
+                previewSection.innerHTML = '<h3>Conversion Preview</h3>'; // Clear previous images
+                previewSection.style.display = 'block';
+                downloadSection.style.display = 'none';
+
+                const pdfData = new Uint8Array(await pdfFile.arrayBuffer());
+                
+                try {
+                    const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+                    const numPages = pdf.numPages;
+                    const zip = new JSZip();
+
+                    for (let i = 1; i <= numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const viewport = page.getViewport({ scale: 1.5 }); // Adjust scale for resolution
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+
+                        await page.render({ canvasContext: context, viewport: viewport }).promise;
+
+                        const imgDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                        const img = document.createElement('img');
+                        img.src = imgDataUrl;
+                        img.className = 'preview-image';
+                        previewSection.appendChild(img);
+
+                        // Add image to ZIP file
+                        const base64Data = imgDataUrl.split(',')[1];
+                        zip.file(`page_${i}.jpg`, base64Data, { base64: true });
+                    }
+
+                    // Generate and set ZIP download link
+                    zip.generateAsync({ type: "blob" }).then(function(content) {
+                        downloadZipLink.href = URL.createObjectURL(content);
+                        downloadSection.style.display = 'block';
+                    });
+
+                } catch (error) {
+                    console.error("Error during PDF processing:", error);
+                    alert("An error occurred during conversion. Please try again.");
+                } finally {
+                    loadingIndicator.style.display = 'none';
+                }
+            });
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</body>
+</html>
