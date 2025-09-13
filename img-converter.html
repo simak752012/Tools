@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Converter Tool | Free Online Photo Converter</title>
+    <meta name="description" content="A free, fast, and easy-to-use online image converter to change image formats (JPG, PNG, WebP) quickly and efficiently.">
+    <meta name="keywords" content="image converter, convert image, JPG to PNG, PNG to JPG, WebP converter, online image tool, free converter">
+    <meta name="author" content="Your Name">
+    <style>
+        /* CSS for responsive design and UI */
+        :root {
+            --primary-color: #007bff;
+            --bg-color: #f4f7f9;
+            --card-bg-color: #ffffff;
+            --text-color: #333;
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .tool-card {
+            background-color: var(--card-bg-color);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-light);
+            text-align: center;
+        }
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+        h1, h2, h3 {
+            color: var(--primary-color);
+        }
+        .input-container {
+            margin-bottom: 20px;
+        }
+        #imageInput {
+            display: none;
+        }
+        .upload-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-block;
+            font-size: 1rem;
+        }
+        .controls-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .convert-options {
+            margin-bottom: 15px;
+        }
+        .convert-options label {
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        #convertBtn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 15px;
+        }
+        .result-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .image-box {
+            text-align: center;
+            flex: 1 1 45%;
+        }
+        .image-box img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .download-btn {
+            background-color: #17a2b8;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 15px;
+        }
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #333;
+            color: white;
+            margin-top: auto;
+        }
+        @media (max-width: 768px) {
+            .result-container {
+                flex-direction: column;
+            }
+            .image-box {
+                flex: 1 1 100%;
+            }
+            .convert-options {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Image Converter Tool</h1>
+        <p>Convert your images to JPG, PNG, or WebP easily.</p>
+    </header>
+
+    <main class="container">
+        <section class="tool-card">
+            <div class="input-container">
+                <input type="file" id="imageInput" accept="image/*">
+                <label for="imageInput" class="upload-btn">Choose Image</label>
+            </div>
+
+            <div class="controls-container">
+                <div class="convert-options">
+                    <label>Convert to:</label>
+                    <input type="radio" id="convertJpg" name="format" value="image/jpeg" checked>
+                    <label for="convertJpg">JPG</label>
+                    <input type="radio" id="convertPng" name="format" value="image/png">
+                    <label for="convertPng">PNG</label>
+                    <input type="radio" id="convertWebp" name="format" value="image/webp">
+                    <label for="convertWebp">WebP</label>
+                </div>
+                <button id="convertBtn">Convert Image</button>
+            </div>
+            
+            <div id="result" class="result-container">
+                <div class="image-box">
+                    <h3>Original Image</h3>
+                    <img id="originalImage" src="#" alt="Original Image" style="display:none;">
+                    <p id="originalInfo"></p>
+                </div>
+                <div class="image-box">
+                    <h3>Converted Image</h3>
+                    <img id="convertedImage" src="#" alt="Converted Image" style="display:none;">
+                    <p id="convertedInfo"></p>
+                    <a id="downloadLink" href="#" download="converted_image" class="download-btn" style="display:none;">Download</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Image Converter Tool. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // JavaScript for dynamic functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const imageInput = document.getElementById('imageInput');
+            const convertJpg = document.getElementById('convertJpg');
+            const convertPng = document.getElementById('convertPng');
+            const convertWebp = document.getElementById('convertWebp');
+            const convertBtn = document.getElementById('convertBtn');
+            const originalImageEl = document.getElementById('originalImage');
+            const convertedImageEl = document.getElementById('convertedImage');
+            const originalInfoEl = document.getElementById('originalInfo');
+            const convertedInfoEl = document.getElementById('convertedInfo');
+            const downloadLink = document.getElementById('downloadLink');
+
+            let originalImageFile = null;
+
+            imageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                originalImageFile = file;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    originalImageEl.src = event.target.result;
+                    originalImageEl.style.display = 'block';
+                    originalInfoEl.textContent = `Type: ${file.type}, Size: ${(file.size / 1024).toFixed(2)} KB`;
+                    
+                    // Reset converted image display
+                    convertedImageEl.style.display = 'none';
+                    downloadLink.style.display = 'none';
+                    convertedInfoEl.textContent = '';
+                };
+                reader.readAsDataURL(file);
+            });
+
+            convertBtn.addEventListener('click', () => {
+                if (!originalImageFile) {
+                    alert('Please select an image first.');
+                    return;
+                }
+
+                const selectedFormat = document.querySelector('input[name="format"]:checked').value;
+                let fileExtension = 'jpg';
+                if (selectedFormat === 'image/png') fileExtension = 'png';
+                else if (selectedFormat === 'image/webp') fileExtension = 'webp';
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+
+                        // Convert image to selected format
+                        const convertedDataUrl = canvas.toDataURL(selectedFormat, 0.9); // 0.9 for JPEG/WebP quality
+
+                        convertedImageEl.src = convertedDataUrl;
+                        convertedImageEl.style.display = 'block';
+
+                        // Calculate converted file size
+                        // Note: DataURL size is not exact file size, but a good estimate
+                        const convertedFileSize = (convertedDataUrl.length * 0.75) / 1024;
+                        convertedInfoEl.textContent = `Type: ${selectedFormat.split('/')[1].toUpperCase()}, Size: ${convertedFileSize.toFixed(2)} KB`;
+
+                        // Set download link attributes
+                        downloadLink.href = convertedDataUrl;
+                        downloadLink.download = `converted_image.${fileExtension}`;
+                        downloadLink.style.display = 'block';
+                    };
+                };
+                reader.readAsDataURL(originalImageFile);
+            });
+        });
+    </script>
+</body>
+</html>
