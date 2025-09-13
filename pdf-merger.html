@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Merger Tool | Combine PDF Files Online</title>
+    <meta name="description" content="A free and fast online tool to merge multiple PDF files into one single document. Combine your PDFs quickly and easily.">
+    <meta name="keywords" content="PDF merger, merge PDF, combine PDF, online PDF tool, free PDF merger, multiple PDF to one">
+    <meta name="author" content="Your Name">
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <style>
+        /* CSS for responsive design and UI */
+        :root {
+            --primary-color: #dc3545;
+            --bg-color: #f4f7f9;
+            --card-bg-color: #ffffff;
+            --text-color: #333;
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .tool-card {
+            background-color: var(--card-bg-color);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-light);
+            text-align: center;
+        }
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+        h1, h2, h3 {
+            color: var(--primary-color);
+        }
+        .input-container {
+            margin-bottom: 20px;
+        }
+        #pdfInput {
+            display: none;
+        }
+        .upload-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-block;
+            font-size: 1rem;
+        }
+        .file-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+        .file-list li {
+            background-color: #e9ecef;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #mergeBtn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 15px;
+        }
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .download-btn {
+            background-color: #17a2b8;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 15px;
+            display: none;
+        }
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #333;
+            color: white;
+            margin-top: auto;
+        }
+        @media (max-width: 768px) {
+            .tool-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>PDF Merger Tool</h1>
+        <p>Combine multiple PDF files into one document.</p>
+    </header>
+
+    <main class="container">
+        <section class="tool-card">
+            <div class="input-container">
+                <input type="file" id="pdfInput" accept=".pdf" multiple>
+                <label for="pdfInput" class="upload-btn">Select PDF Files</label>
+            </div>
+            
+            <ul id="fileList" class="file-list"></ul>
+            
+            <button id="mergeBtn" style="display:none;">Merge PDFs</button>
+            <p id="status"></p>
+            <a id="downloadLink" class="download-btn">Download Merged PDF</a>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 PDF Merger Tool. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // JavaScript for dynamic functionality
+        const { PDFDocument } = PDFLib;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const pdfInput = document.getElementById('pdfInput');
+            const fileList = document.getElementById('fileList');
+            const mergeBtn = document.getElementById('mergeBtn');
+            const statusEl = document.getElementById('status');
+            const downloadLink = document.getElementById('downloadLink');
+
+            let filesToMerge = [];
+
+            pdfInput.addEventListener('change', (e) => {
+                filesToMerge = Array.from(e.target.files);
+                if (filesToMerge.length > 0) {
+                    displayFileList();
+                    mergeBtn.style.display = 'block';
+                    statusEl.textContent = `${filesToMerge.length} files selected.`;
+                    downloadLink.style.display = 'none';
+                } else {
+                    fileList.innerHTML = '';
+                    mergeBtn.style.display = 'none';
+                    statusEl.textContent = '';
+                }
+            });
+
+            mergeBtn.addEventListener('click', async () => {
+                if (filesToMerge.length < 2) {
+                    statusEl.textContent = 'Please select at least two PDF files.';
+                    return;
+                }
+                
+                statusEl.textContent = 'Merging PDFs... Please wait.';
+                mergeBtn.disabled = true;
+                
+                const mergedPdf = await PDFDocument.create();
+                
+                for (const file of filesToMerge) {
+                    try {
+                        const fileBytes = await file.arrayBuffer();
+                        const pdfDoc = await PDFDocument.load(fileBytes);
+                        const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+                        copiedPages.forEach((page) => mergedPdf.addPage(page));
+                    } catch (error) {
+                        console.error(`Failed to load or merge file: ${file.name}`, error);
+                        statusEl.textContent = `Error merging ${file.name}. Check console for details.`;
+                        mergeBtn.disabled = false;
+                        return;
+                    }
+                }
+                
+                const mergedPdfBytes = await mergedPdf.save();
+                
+                const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                
+                downloadLink.href = url;
+                downloadLink.download = 'merged.pdf';
+                downloadLink.style.display = 'inline-block';
+                
+                statusEl.textContent = 'Merge successful!';
+                mergeBtn.disabled = false;
+            });
+            
+            function displayFileList() {
+                fileList.innerHTML = '';
+                filesToMerge.forEach(file => {
+                    const li = document.createElement('li');
+                    li.textContent = file.name;
+                    fileList.appendChild(li);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
